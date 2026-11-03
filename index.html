@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Operations Demo</title>
+<style>
+:root {
+  --site-primary: #183B32;
+  --site-on-primary: #FFFFFF;
+  --site-secondary: #E7F0EB;
+  --site-on-secondary: #183B32;
+  --site-background: #F4F7F5;
+  --site-on-background: #17231F;
+  --site-font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-font-heading: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-heading-scale: 1;
+  --site-spacing-scale: 1;
+  --site-radius-scale: 1;
+  --site-decoration-opacity: 1;
+  color-scheme: light dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--site-font-body); background: var(--site-background); color: var(--site-on-background); }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+#app { min-height: 100vh; width: 100%; background-color: var(--site-background); color: var(--site-on-background); display: flex; border-radius: 0; }
+.sidebar { width: 248px; flex: 0 0 248px; background: var(--site-primary); color: var(--site-on-primary); padding: calc(22px * var(--site-spacing-scale)) 14px; display: flex; flex-direction: column; gap: 24px; }
+.brand { display:flex; align-items:center; gap:11px; padding: 0 10px; }
+.brand-mark { width:39px; height:39px; border-radius: calc(12px * var(--site-radius-scale)); background:#D5E9DE; color:#183B32; display:grid; place-items:center; font-weight:850; font-size:17px; }
+.brand-name { font-family:var(--site-font-heading); font-weight:750; letter-spacing:-.4px; font-size:16px; }
+.brand-sub { color:#B7CDC3; font-size:10px; margin-top:3px; letter-spacing:.7px; text-transform:uppercase; }
+.nav-label { color:#9FB8AC; text-transform:uppercase; letter-spacing:1.1px; font-size:10px; font-weight:750; padding:0 12px; margin-bottom:7px; }
+.nav { display:grid; gap:5px; }
+.nav button { border:0; color:#D5E4DC; background:transparent; padding:11px 12px; border-radius:10px; display:flex; gap:12px; align-items:center; text-align:left; font-size:13px; width:100%; }
+.nav button:hover, .nav button.active { background:#2B5145; color:white; }
+.nav-icon { width:18px; text-align:center; font-size:16px; }
+.sidebar-bottom { margin-top:auto; border-top:1px solid #426257; padding:15px 10px 0; color:#C3D4CC; font-size:11px; line-height:1.6; }
+.demo-tag { display:inline-flex; border:1px solid #729184; color:#D7E8DF; border-radius:30px; padding:3px 8px; font-size:10px; margin-bottom:9px; }
+.main { min-width:0; flex:1; }
+.topbar { height:70px; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:0 30px; background:light-dark(#FFFFFF,#17231F); border-bottom:1px solid light-dark(#E4EBE7,#34443D); }
+.breadcrumb { color:light-dark(#728078,#A8B7AF); font-size:12px; }
+.top-actions { display:flex; align-items:center; gap:12px; }
+.today-pill { border:1px solid light-dark(#E0E8E3,#42534A); background:light-dark(#F8FAF9,#24332C); padding:8px 11px; border-radius:9px; color:light-dark(#43534A,#CFDCD4); font-size:11px; }
+.avatar { width:34px; height:34px; display:grid; place-items:center; border-radius:50%; background:#DCEBE2; color:#183B32; font-size:12px; font-weight:800; }
+.content { padding:34px 38px 48px; max-width:1500px; margin:0 auto; }
+.page-head { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:23px; }
+h1 { font-family:var(--site-font-heading); font-size:calc(30px * var(--site-heading-scale)); letter-spacing:-.8px; margin:0 0 8px; }
+.subtitle { color:light-dark(#718078,#AAB9B0); font-size:14px; }
+.actions { display:flex; gap:9px; flex-wrap:wrap; }
+.btn { border:1px solid light-dark(#DCE5DF,#45564C); background:light-dark(#FFFFFF,#26352D); color:light-dark(#31443A,#E4EEE8); border-radius:9px; padding:9px 13px; font-size:12px; font-weight:650; }
+.btn:hover { border-color:#719585; }
+.btn.primary { background:var(--site-primary); color:white; border-color:var(--site-primary); }
+.btn.soft { background:var(--site-secondary); color:var(--site-on-secondary); border-color:var(--site-secondary); }
+.btn.danger { color:#B34B45; border-color:#E9C8C5; background:#FFF8F7; }
+.grid { display:grid; gap:20px; }
+.stats { grid-template-columns:repeat(4,minmax(0,1fr)); margin-bottom:19px; }
+.card { background:light-dark(#FFFFFF,#1D2A24); border:1px solid light-dark(#E4EBE7,#34443D); border-radius:calc(14px * var(--site-radius-scale)); padding:23px; min-width:0; }
+.stat-top { display:flex; justify-content:space-between; align-items:center; color:light-dark(#75827B,#AAB9B0); font-size:13px; }
+.stat-icon { width:31px; height:31px; border-radius:9px; display:grid; place-items:center; background:var(--site-secondary); color:var(--site-on-secondary); font-size:15px; }
+.stat-number { font-size:32px; font-weight:760; letter-spacing:-.8px; margin:14px 0 5px; }
+.stat-note { font-size:12px; color:light-dark(#8A968F,#93A49A); }
+.two-col { grid-template-columns:minmax(0,1.45fr) minmax(280px,.85fr); }
+.section-title { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+h2 { font-size:17px; letter-spacing:-.2px; margin:0; }
+.muted { color:light-dark(#819087,#A5B4AB); font-size:11px; }
+.table-wrap { overflow:auto; }
+table { width:100%; border-collapse:collapse; font-size:14px; white-space:nowrap; }
+th { text-align:left; color:light-dark(#839087,#AAB8B0); font-size:12px; text-transform:uppercase; letter-spacing:.65px; font-weight:700; padding:14px 13px; border-bottom:1px solid light-dark(#E9EFEB,#34443D); }
+td { padding:16px 13px; border-bottom:1px solid light-dark(#EFF3F0,#2F3D36); }
+tr:last-child td { border-bottom:0; }
+.person { display:flex; align-items:center; gap:9px; }
+.initials { width:29px; height:29px; border-radius:9px; background:#E8F0EB; color:#315A48; display:grid; place-items:center; font-size:9px; font-weight:800; flex:0 0 auto; }
+.person-name { font-weight:650; font-size:13px; }
+.person-sub { color:light-dark(#87938C,#9EADA4); font-size:11px; margin-top:3px; }
+.status { display:inline-flex; align-items:center; gap:5px; border-radius:30px; padding:5px 9px; font-size:12px; font-weight:650; }
+.status:before { content:""; width:5px; height:5px; border-radius:50%; background:currentColor; }
+.status.present, .status.available { background:#E8F5ED; color:#27744A; }
+.status.absent, .status.unassigned { background:#FCEDEC; color:#B64E47; }
+.status.busy, .status.pending { background:#FFF4E3; color:#A56A1D; }
+.status.approved { background:#E8F5ED; color:#27744A; }
+.period-list { display:grid; gap:9px; }
+.period-row { display:flex; align-items:center; gap:10px; }
+.period-num { width:28px; height:28px; border-radius:8px; background:light-dark(#F0F4F1,#2B3932); display:grid; place-items:center; font-size:10px; font-weight:750; }
+.period-info { flex:1; min-width:0; }
+.period-label { font-size:11px; font-weight:650; }
+.period-time { font-size:9px; color:light-dark(#89958E,#A0B0A6); margin-top:3px; }
+.mini-bar { height:5px; background:light-dark(#EDF1EE,#34443D); border-radius:8px; width:74px; overflow:hidden; }
+.mini-bar span { display:block; height:100%; background:#6C9A80; border-radius:8px; }
+.toolbar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+.field, select { border:1px solid light-dark(#DDE6E0,#43534A); background:light-dark(#FFFFFF,#24332C); color:light-dark(#25372D,#E4EEE8); border-radius:9px; padding:11px 13px; font-size:14px; outline:none; }
+.field:focus, select:focus { border-color:#6E9B83; box-shadow:0 0 0 3px #6E9B8320; }
+.toolbar .field { min-width:180px; }
+.day-tabs { display:flex; gap:6px; flex-wrap:wrap; }
+.day-tabs button { border:1px solid light-dark(#DFE7E1,#43534A); background:light-dark(#FFFFFF,#24332C); color:light-dark(#5B6A61,#CBD8D0); border-radius:8px; padding:8px 11px; font-size:10px; }
+.day-tabs button.active { background:var(--site-primary); border-color:var(--site-primary); color:white; }
+.period-tabs { display:flex; gap:6px; flex-wrap:wrap; }
+.period-tabs button { border:1px solid light-dark(#DFE7E1,#43534A); background:light-dark(#FFFFFF,#24332C); color:light-dark(#5B6A61,#CBD8D0); border-radius:8px; padding:7px 10px; font-size:10px; }
+.period-tabs button.active { background:var(--site-secondary); border-color:#B8D1C1; color:var(--site-on-secondary); font-weight:750; }
+.notice { padding:11px 13px; border-radius:10px; background:#F0F6F2; border:1px solid #DCEBE1; color:#41624E; font-size:11px; line-height:1.5; margin-bottom:14px; }
+.empty { padding:28px 15px; text-align:center; color:light-dark(#819087,#AAB8B0); font-size:12px; }
+.actions-cell { display:flex; gap:6px; }
+.small-btn { border:1px solid light-dark(#DDE6E0,#43534A); background:transparent; color:light-dark(#365344,#C7D7CE); border-radius:7px; padding:6px 8px; font-size:10px; }
+.small-btn:hover { background:var(--site-secondary); color:var(--site-on-secondary); }
+.small-btn.assign { background:var(--site-primary); color:white; border-color:var(--site-primary); }
+.modal-backdrop { position:fixed; inset:0; background:#10221BCC; display:grid; place-items:center; padding:18px; z-index:10; }
+.modal { width:min(520px,100%); max-height:88vh; overflow:auto; background:light-dark(#FFFFFF,#1D2A24); border:1px solid light-dark(#E1E9E3,#405047); border-radius:16px; padding:21px; box-shadow:0 20px 70px #0003; }
+.modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+.modal-head h2 { font-size:17px; }
+.close { border:0; background:transparent; color:inherit; font-size:22px; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.form-group { display:grid; gap:6px; }
+.form-group.full { grid-column:1/-1; }
+.form-group label { font-size:10px; color:light-dark(#718078,#AAB9B0); font-weight:700; }
+.form-group input, .form-group select { width:100%; }
+.modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+.toast { position:fixed; bottom:20px; right:20px; z-index:20; background:#183B32; color:white; padding:12px 16px; border-radius:10px; font-size:12px; box-shadow:0 8px 30px #0002; animation:rise .2s ease; }
+@keyframes rise { from { transform:translateY(8px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+.mobile-menu { display:none; }
+/* Keep staff and availability views readable without horizontal scrolling. */
+.teachers-card .toolbar { gap:10px; margin-bottom:14px; }
+.teachers-card .toolbar .field { min-width:220px; flex:1 1 260px; }
+.teachers-table { table-layout:fixed; white-space:normal; }
+.teachers-table th, .teachers-table td { padding:11px 9px; }
+.teachers-table th { font-size:11px; letter-spacing:.35px; }
+.teachers-table td { font-size:12px; line-height:1.4; overflow-wrap:anywhere; }
+.teachers-table th:nth-child(1) { width:21%; }
+.teachers-table th:nth-child(2) { width:11%; }
+.teachers-table th:nth-child(3) { width:25%; }
+.teachers-table th:nth-child(4) { width:13%; }
+.teachers-table th:nth-child(5) { width:10%; }
+.teachers-table th:nth-child(6) { width:13%; }
+.teachers-table th:nth-child(7) { width:7%; }
+.teachers-table .person { gap:7px; }
+.teachers-table .initials { width:26px; height:26px; }
+.teachers-table .person-name { font-size:12px; }
+.teachers-table .person-sub { font-size:10px; }
+.availability-card .toolbar { gap:12px; margin-bottom:20px; }
+.availability-card .toolbar select { min-width:150px; font-size:14px; padding:12px 14px; }
+.availability-card .section-title { margin-bottom:12px; }
+.availability-table { table-layout:fixed; white-space:normal; }
+.availability-table th, .availability-table td { padding:13px 11px; }
+.availability-table th { font-size:12px; }
+.availability-table td { font-size:13px; overflow-wrap:anywhere; }
+.availability-table th:nth-child(1) { width:27%; }
+.availability-table th:nth-child(2) { width:15%; }
+.availability-table th:nth-child(3) { width:34%; }
+.availability-table th:nth-child(4) { width:12%; }
+.availability-table th:nth-child(5) { width:12%; }
+.undo-btn { border:1px solid #D9B9A9; background:#FFF7F2; color:#995333; border-radius:7px; padding:7px 10px; font-size:12px; font-weight:650; }
+.undo-btn:hover { background:#FCE9DE; }
+.attendance-workspace { display:grid; grid-template-columns:minmax(320px,.95fr) minmax(420px,1.35fr); gap:18px; align-items:start; }
+.attendance-list { display:grid; gap:0; }
+.attendance-person { display:grid; grid-template-columns:minmax(0,1fr) 170px; gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid light-dark(#E9EFEB,#34443D); }
+.attendance-person:last-child { border-bottom:0; }
+.attendance-person select { width:100%; }
+.coverage-list { display:grid; gap:10px; }
+.coverage-card { border:1px solid light-dark(#E0E8E3,#3A4A41); border-left:4px solid #C45C52; border-radius:11px; padding:14px; background:light-dark(#FFFFFF,#1D2A24); }
+.coverage-card.assigned { border-left-color:#39835A; }
+.coverage-title { font-size:14px; font-weight:750; }
+.coverage-sub { color:light-dark(#819087,#A5B4AB); font-size:12px; margin-top:6px; }
+.coverage-assigned { color:#39835A; font-size:13px; font-weight:700; margin-top:10px; }
+.coverage-choice { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:12px; padding-top:10px; border-top:1px dashed light-dark(#D9E2DC,#405047); }
+.coverage-choice select { min-width:0; flex:1; }
+.message-preview { background:#E3F3E9; color:#214A34; border-radius:10px; padding:13px; font-size:13px; line-height:1.55; white-space:pre-wrap; }
+.notification-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; padding:15px 0; border-bottom:1px solid light-dark(#E9EFEB,#34443D); }
+.notification-row:last-child { border-bottom:0; }
+.notification-actions { display:flex; gap:7px; flex-wrap:wrap; }
+@media (max-width: 900px) { .attendance-workspace { grid-template-columns:1fr; } }
+@media (max-width: 650px) { .attendance-person { grid-template-columns:1fr; gap:8px; } .coverage-choice,.notification-row { grid-template-columns:1fr; display:grid; } }
+@media (prefers-color-scheme: dark) {
+  .notice { background:#26392E; border-color:#3C5947; color:#B7D8C2; }
+  .status.present,.status.available,.status.approved { background:#203D2D; color:#8ED0A4; }
+  .status.absent,.status.unassigned { background:#472B2A; color:#F0A19B; }
+  .status.busy,.status.pending { background:#473821; color:#E6BD78; }
+  .btn.danger { background:#382725; border-color:#60403D; }
+}
+@media (max-width: 900px) {
+  .sidebar { width:214px; flex-basis:214px; }
+  .content { padding:23px 20px 34px; }
+  .topbar { padding:0 20px; }
+  .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .two-col { grid-template-columns:1fr; }
+}
+@media (max-width: 650px) {
+  #app { display:block; }
+  .sidebar { width:100%; height:auto; padding:12px 14px; display:block; }
+  .brand { padding:0 4px; }
+  .sidebar .nav-label, .sidebar-bottom { display:none; }
+  .nav { display:flex; overflow-x:auto; margin-top:12px; padding-bottom:3px; }
+  .nav button { white-space:nowrap; width:auto; padding:9px 10px; font-size:11px; }
+  .nav-icon { display:none; }
+  .topbar { height:54px; padding:0 15px; }
+  .content { padding:21px 14px 30px; }
+  .page-head { display:block; }
+  .page-head .actions { margin-top:14px; }
+  h1 { font-size:23px; }
+  .stats { gap:9px; }
+  .card { padding:13px; }
+  .stat-number { font-size:23px; }
+  .form-grid { grid-template-columns:1fr; }
+  .form-group.full { grid-column:auto; }
+  .today-pill { display:none; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">CO</div>
+      <div><div class="brand-name">Coaching Ops</div><div class="brand-sub">School operations</div></div>
+    </div>
+    <div>
+      <div class="nav-label">Workspace</div>
+      <nav class="nav" id="navigation">
+        <button class="active" data-page="dashboard"><span class="nav-icon">▦</span>Dashboard</button>
+        <button data-page="teachers"><span class="nav-icon">♙</span>Teachers</button>
+        <button data-page="timetable"><span class="nav-icon">▦</span>Timetable</button>
+        <button data-page="attendance"><span class="nav-icon">✓</span>Attendance</button>
+        <button data-page="availability"><span class="nav-icon">◷</span>Availability</button>
+        <button data-page="substitutions"><span class="nav-icon">⇄</span>Substitutions</button>
+        <button data-page="notifications"><span class="nav-icon">♧</span>Notifications <span id="notification-count" style="margin-left:auto;background:#D5E9DE;color:#183B32;border-radius:20px;padding:2px 6px;font-size:9px;">0</span></button>
+      </nav>
+    </div>
+    <div class="sidebar-bottom"><div class="demo-tag">● DEMO ENVIRONMENT</div><br>Sample school workspace<br>All teacher records are fictional.</div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="breadcrumb">School workspace <span style="padding:0 7px;opacity:.5">/</span> <strong id="crumb-current">Dashboard</strong></div>
+      <div class="top-actions"><div class="today-pill" id="top-date">Wednesday · Demo week</div><div class="avatar">AD</div></div>
+    </header>
+    <section class="content" id="content"></section>
+  </main>
+</div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+<script>
+(() => {
+  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const subjects = ['Mathematics','English','Science','Urdu','Islamiat','Social Studies','Physics','Chemistry','Biology','Computer'];
+  const firstNames = ['Ayesha','Ahmed','Bilal','Hina','Usman','Fatima','Hamza','Zara','Saad','Maryam','Ali','Noor','Hassan','Sana','Danish','Iqra','Omar','Maham','Talha','Laiba','Fahad','Anaya','Rayan','Amna','Zain','Mehak','Arham','Sadia','Ibrahim','Eman','Kashif','Minal','Farhan','Areeba','Sameer','Nimra','Taha','Kiran','Shayan','Aqsa'];
+  const lastNames = ['Khan','Ahmed','Malik','Sheikh','Hussain','Iqbal','Raza','Siddiqui','Ali','Farooq'];
+  const initials = n => n.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+  const rand = (seed) => { let x = Math.sin(seed * 9283.17) * 43758.5453; return x - Math.floor(x); };
+  const teachers = firstNames.map((first,i) => {
+    const band = i < 13 ? 'Primary' : i < 27 ? 'Middle' : 'Secondary';
+    const level = band === 'Primary' ? [1,2,3,4,5] : band === 'Middle' ? [6,7,8] : [9,10];
+    const options = band === 'Primary' ? ['Mathematics','English','Science','Urdu','Islamiat','Social Studies'] : band === 'Middle' ? ['Mathematics','English','Science','Urdu','Islamiat','Social Studies','Computer'] : ['Mathematics','English','Physics','Chemistry','Biology','Urdu','Islamiat','Computer'];
+    const chosen = options.filter((s,j)=>rand(i*13+j+4)>.43).slice(0,3);
+    if (!chosen.length) chosen.push(options[0]);
+    return {id:'T-'+String(i+1).padStart(3,'0'), name:first+' '+lastNames[Math.floor(rand(i+9)*lastNames.length)], phone:'+92 300 '+String(1000000+i*137).slice(0,7), band, levels:level, subjects:chosen, max:6, active:true};
+  });
+  // Ensure each grade has qualified staff for every subject used in the sample timetable.
+  teachers.forEach((t,i)=> { if (i%4===0) t.subjects = t.band==='Primary'?['Mathematics','English','Science','Urdu','Islamiat','Social Studies']:t.band==='Middle'?['Mathematics','English','Science','Urdu','Islamiat','Social Studies','Computer']:['Mathematics','English','Physics','Chemistry','Biology','Urdu','Islamiat','Computer']; });
+  const classSubjects = grade => grade <= 5 ? ['Mathematics','English','Science','Urdu','Islamiat','Social Studies'] : grade <= 8 ? ['Mathematics','English','Science','Urdu','Islamiat','Social Studies','Computer'] : ['Mathematics','English','Physics','Chemistry','Biology','Urdu','Islamiat','Computer'];
+  const eligible = (t,grade,subject) => t.levels.includes(grade) && t.subjects.includes(subject);
+  const timetable = {};
+  days.forEach((day,di) => {
+    for (let p=1;p<=8;p++) {
+      const used = new Set();
+      for (let grade=1;grade<=10;grade++) {
+        const pool = teachers.filter(t=>eligible(t,grade,classSubjects(grade)[Math.floor(rand(di*100+p*11+grade*3)*classSubjects(grade).length)]) && !used.has(t.id));
+        const subjectList = classSubjects(grade);
+        const subject = subjectList[Math.floor(rand(di*71+p*17+grade*29)*subjectList.length)];
+        let candidates = teachers.filter(t=>eligible(t,grade,subject) && !used.has(t.id));
+        if (!candidates.length) candidates = teachers.filter(t=>t.levels.includes(grade) && !used.has(t.id));
+        const teacher = candidates[Math.floor(rand(di*19+p*31+grade*7)*candidates.length)] || teachers.find(t=>t.levels.includes(grade));
+        used.add(teacher.id);
+        timetable[`${day}|${p}|${grade}`] = {day,period:p,grade,teacherId:teacher.id,subject};
+      }
+    }
+  });
+  const state = {
+    teachers, timetable, day:'Wednesday', period:3,
+    attendance:{}, assignments:[], notifications:[],
+    timetableVersion:'Week 1 · Demo timetable',
+    page:'dashboard', search:'', teacherFilter:'1', availabilityFilter:'all',
+    selectedGrade:'1', availabilityGrade:'1', nextNotificationId:1
+  };
+  const timeFor = p => ({1:'8:00 – 8:40',2:'8:40 – 9:20',3:'9:20 – 10:00',4:'10:00 – 10:40',5:'11:10 – 11:50',6:'11:50 – 12:30',7:'12:30 – 1:10',8:'1:10 – 1:50'}[p]);
+  const attendanceStatus = id => state.attendance[`${state.day}|${id}`] || 'Present';
+  const getEntry = (day,p,grade) => state.timetable[`${day}|${p}|${grade}`];
+  const assignedTeacher = (day,p,grade) => state.assignments.find(a=>a.day===day&&a.period===p&&a.grade===grade&&a.status==='Approved');
+  const isBusy = (teacherId,day,p) => Object.values(state.timetable).some(e=>e.day===day&&e.period===p&&e.teacherId===teacherId) || state.assignments.some(a=>a.day===day&&a.period===p&&a.teacherId===teacherId&&a.status==='Approved');
+  const isAbsent = (teacherId,day) => (state.attendance[`${day}|${teacherId}`] || 'Present') !== 'Present';
+  const isAvailable = (teacher,day,p) => !isAbsent(teacher.id,day) && !isBusy(teacher.id,day,p);
+  const availableTeachers = (day,p,grade,subject) => teachers.filter(t=>isAvailable(t,day,p)&&eligible(t,grade,subject));
+  const allAvailable = (day,p) => teachers.filter(t=>isAvailable(t,day,p));
+  const uncovered = day => Object.values(timetable).filter(e=>e.day===day && isAbsent(e.teacherId,day) && !assignedTeacher(day,e.period,e.grade));
+  const assignedCount = day => state.assignments.filter(a=>a.day===day&&a.status==='Approved').length;
+  const fmt = n => String(n).padStart(2,'0');
+  function toast(message) {
+    const root=document.getElementById('toast-root'); root.innerHTML=`<div class="toast">${message}</div>`;
+    setTimeout(()=>root.innerHTML='',2600);
+  }
+  function status(label,cls) { return `<span class="status ${cls}">${label}</span>`; }
+  function teacherCell(t) { return `<div class="person"><div class="initials">${initials(t.name)}</div><div><div class="person-name">${t.name}</div><div class="person-sub">${t.id} · ${t.band}</div></div></div>`; }
+  function pageHead(title,sub,buttons='') { return `<div class="page-head"><div><h1>${title}</h1><div class="subtitle">${sub}</div></div><div class="actions">${buttons}</div></div>`; }
+  function statsCard(label,value,note,icon) { return `<div class="card"><div class="stat-top"><span>${label}</span><span class="stat-icon">${icon}</span></div><div class="stat-number">${value}</div><div class="stat-note">${note}</div></div>`; }
+  function render() {
+    document.querySelectorAll('#navigation button').forEach(b=>b.classList.toggle('active',b.dataset.page===state.page));
+    document.getElementById('crumb-current').textContent=({dashboard:'Dashboard',teachers:'Teachers',timetable:'Timetable',attendance:'Attendance',availability:'Teacher availability',substitutions:'Substitutions',notifications:'Notifications'})[state.page];
+    const views={dashboard:dashboardPage,teachers:teachersPage,timetable:timetablePage,attendance:attendancePage,availability:availabilityPage,substitutions:substitutionsPage,notifications:notificationsPage};
+    document.getElementById('content').innerHTML=views[state.page]();
+    document.getElementById('notification-count').textContent=state.notifications.filter(n=>n.status==='Pending').length;
+    bindPageEvents();
+  }
+  function dashboardPage() {
+    const absent = teachers.filter(t => isAbsent(t.id, state.day)).length;
+    const onLeave = teachers.filter(t => state.attendance[`${state.day}|${t.id}`] === 'Leave').length;
+    const present = teachers.length - absent;
+    return pageHead('School overview', 'Staff attendance summary for ' + state.day + '.', '<button class="btn" data-action="reset-demo">↻ Reset demo</button><button class="btn primary" data-go="attendance">Manage attendance</button>') +
+      `<div class="toolbar"><label class="muted">Working day</label><select id="dash-day">${days.map(d => `<option ${d === state.day ? 'selected' : ''}>${d}</option>`).join('')}</select></div>` +
+      `<div class="grid stats">${statsCard('Total teachers', teachers.length, 'Fictional demo records', '♙')}${statsCard('Present', present, 'Marked present', '✓')}${statsCard('Absent', absent - onLeave, 'Marked absent', '!')}${statsCard('On leave', onLeave, 'Marked on leave', '—')}</div>`;
+  }
+  function teachersPage() {
+    const selectedClass=Number(state.teacherFilter||1);
+    const filtered=teachers.filter(t=>(t.name+' '+t.id+' '+t.subjects.join(' ')).toLowerCase().includes(state.search.toLowerCase())&&t.levels.includes(selectedClass));
+    return pageHead('Teachers','Manage staff profiles, subjects and teaching eligibility.',`<button class="btn" data-action="export-teachers">↓ Export CSV</button><button class="btn primary" data-action="add-teacher">＋ Add teacher</button>`)+
+      `<div class="card teachers-card"><div class="toolbar"><input class="field" id="teacher-search" placeholder="Search name, ID or subject…" value="${state.search}"><select id="teacher-filter" aria-label="Select class">${Array.from({length:10},(_,i)=>`<option value="${i+1}" ${selectedClass===i+1?'selected':''}>Class ${i+1}</option>`).join('')}</select><span class="muted">${filtered.length} teachers for Class ${selectedClass}</span></div><div class="table-wrap"><table class="teachers-table"><thead><tr><th>Teacher</th><th>Teaching level</th><th>Subjects</th><th>Eligible classes</th><th>Daily limit</th><th>Status today</th><th></th></tr></thead><tbody>${filtered.map(t=>`<tr><td>${teacherCell(t)}</td><td>${t.band}</td><td>${t.subjects.join(', ')}</td><td>${t.levels[0]}–${t.levels[t.levels.length-1]}</td><td>${t.max} max</td><td>${isAbsent(t.id,state.day)?status('Absent','absent'):status('Present','present')}</td><td><button class="small-btn" data-edit-teacher="${t.id}">Edit</button></td></tr>`).join('')}</tbody></table></div></div>`;
+  }
+  function timetablePage() {
+    const grade=Number(state.selectedGrade || 1);
+    const entries=Array.from({length:8},(_,i)=>getEntry(state.day,i+1,grade));
+    return pageHead('Timetable', 'Choose a day and class to view its timetable · ' + state.timetableVersion, `<button class="btn" data-action="print">▤ Print timetable</button><button class="btn" data-action="export-timetable">↓ Export CSV</button><button class="btn primary" data-action="duplicate-week">＋ Duplicate week</button>`)+
+      `<div class="card"><div class="toolbar"><div class="form-group"><label>SELECT DAY</label><select id="timetable-day">${days.map(d=>`<option ${d===state.day?'selected':''}>${d}</option>`).join('')}</select></div><div class="form-group"><label>SELECT CLASS</label><select id="grade-filter">${Array.from({length:10},(_,i)=>`<option value="${i+1}" ${grade===i+1?'selected':''}>Class ${i+1}</option>`).join('')}</select></div></div><div class="section-title"><h2>Class ${grade} · ${state.day}</h2></div><div class="table-wrap"><table><thead><tr><th>Period</th><th>Time</th><th>Subject</th><th>Teacher</th><th></th></tr></thead><tbody>${entries.map(e=>{const t=teachers.find(x=>x.id===e.teacherId);return `<tr><td><strong>${e.period}</strong></td><td>${timeFor(e.period)}</td><td>${e.subject}</td><td>${t.name}</td><td><button class="small-btn" data-edit-entry="${e.day}|${e.period}|${e.grade}">Edit</button></td></tr>${e.period===4?'<tr><td colspan="5" style="background:light-dark(#F7FAF8,#23332B);color:light-dark(#7E8E84,#AAB8B0);text-align:center;padding:12px">☕ Break</td></tr>':''}`}).join('')}</tbody></table></div></div>`+
+      `<div class="notice" style="margin-top:16px;margin-bottom:0">Demo timetable · Sample data only</div>`;
+  }
+  function attendancePage() {
+    const list=teachers.filter(t=>state.search===''||t.name.toLowerCase().includes(state.search.toLowerCase()));
+    const absentTeachers=teachers.filter(t=>isAbsent(t.id,state.day));
+    const coverage=absentTeachers.flatMap(t=>Object.values(timetable).filter(e=>e.day===state.day&&e.teacherId===t.id).map(e=>({teacher:t,entry:e,assignment:assignedTeacher(state.day,e.period,e.grade)}))).sort((a,b)=>a.entry.period-b.entry.period||a.entry.grade-b.entry.grade);
+    return pageHead('Teacher attendance','Record who is present, absent or on leave.',`<button class="btn" data-action="reset-attendance">Reset selected day</button>`)+
+      `<div class="toolbar"><select id="attendance-day">${days.map(d=>`<option ${d===state.day?'selected':''}>${d}</option>`).join('')}</select><input class="field" id="attendance-search" placeholder="Search teacher…" value="${state.search}"><span class="muted">${absentTeachers.length} absent / on leave · ${coverage.filter(x=>!x.assignment).length} classes need cover</span></div><div class="attendance-workspace"><div class="card"><div class="section-title"><h2>1. Mark attendance</h2><span class="muted">${list.length} teachers</span></div><div class="attendance-list">${list.map(t=>`<div class="attendance-person"><div>${teacherCell(t)}<div class="person-sub" style="margin-left:38px">${t.subjects.join(', ')}</div></div><select data-attendance="${t.id}" aria-label="Attendance for ${t.name}"><option ${attendanceStatus(t.id)==='Present'?'selected':''}>Present</option><option ${attendanceStatus(t.id)==='Absent'?'selected':''}>Absent</option><option ${attendanceStatus(t.id)==='Leave'?'selected':''}>Leave</option></select></div>`).join('')}</div></div><div class="card"><div class="section-title"><h2>2. Assign replacements</h2><span class="muted">${coverage.length} affected classes</span></div>${coverage.length?`<div class="coverage-list">${coverage.map(({teacher,entry,assignment})=>{const candidates=availableTeachers(state.day,entry.period,entry.grade,entry.subject);return `<div class="coverage-card ${assignment?'assigned':''}"><div class="coverage-title">Period ${entry.period} (${timeFor(entry.period).split(' – ')[0]}) · Class ${entry.grade} · ${entry.subject}</div><div class="coverage-sub">Absent: ${teacher.name}</div>${assignment?`<div class="coverage-assigned">Assigned: ${teachers.find(t=>t.id===assignment.teacherId)?.name||'Teacher'} <button class="small-btn" data-undo-assignment="${assignment.notificationId||''}" style="margin-left:8px">Undo</button></div>`:`<div class="coverage-choice"><div><strong style="font-size:13px">${candidates.length?candidates[0].name:'No teacher available'}</strong><div class="person-sub">${candidates.length?'Free and eligible · '+candidates.length+' available':'No eligible teacher is free'}</div></div>${candidates.length?`<button class="btn primary" data-assign="${entry.day}|${entry.period}|${entry.grade}">Assign</button>`:status('Unavailable','unassigned')}</div>`}</div>`}).join('')}</div>`:`<div class="empty">No absent teachers yet. Mark a teacher absent to see their affected classes here.</div>`}</div></div><div class="notice" style="margin-top:14px">Choose a replacement manually. Assignment creates a pending WhatsApp message; nothing is sent until the coordinator sends it from Notifications. Demo only — no real WhatsApp delivery.</div>`;
+  }
+  function availabilityPage() {
+    const grade=Number(state.availabilityGrade);
+    const free=allAvailable(state.day,state.period).filter(t=>t.levels.includes(grade));
+    return pageHead('Teacher availability','Find free teachers for a selected class and period.')+
+      `<div class="card availability-card"><div class="toolbar"><select id="availability-day" aria-label="Select day">${days.map(d=>`<option ${d===state.day?'selected':''}>${d}</option>`).join('')}</select><select id="availability-period" aria-label="Select period">${Array.from({length:8},(_,i)=>`<option value="${i+1}" ${state.period===i+1?'selected':''}>Period ${i+1}</option>`).join('')}</select><select id="availability-grade" aria-label="Select class">${Array.from({length:10},(_,i)=>`<option value="${i+1}" ${grade===i+1?'selected':''}>Class ${i+1}</option>`).join('')}</select></div><div class="section-title"><h2>${free.length} available teachers</h2><span class="muted">${state.day} · Period ${state.period} · Class ${grade}</span></div><div class="table-wrap"><table class="availability-table"><thead><tr><th>Teacher</th><th>Level</th><th>Subjects</th><th>Today's periods</th><th>Status</th></tr></thead><tbody>${free.map(t=>{const load=Object.values(timetable).filter(e=>e.day===state.day&&e.teacherId===t.id).length+state.assignments.filter(a=>a.day===state.day&&a.teacherId===t.id&&a.status==='Approved').length;return `<tr><td>${teacherCell(t)}</td><td>${t.band}</td><td>${t.subjects.join(', ')}</td><td>${load}/8</td><td>${status('Free','available')}</td></tr>`}).join('')||'<tr><td colspan="5" class="empty">No free teachers for this class and period.</td></tr>'}</tbody></table></div></div>`;
+  }
+  function substitutionsPage() {
+    const uncoveredRows=uncovered(state.day);
+    return pageHead('Substitutions','Review uncovered classes and assign an available teacher.',`<button class="btn" data-go="attendance">Mark absence</button>`)+
+      `<div class="card"><div class="toolbar"><select id="sub-day">${days.map(d=>`<option ${d===state.day?'selected':''}>${d}</option>`).join('')}</select><span class="muted">${uncoveredRows.length} uncovered classes · ${assignedCount(state.day)} approved assignments</span></div><div class="section-title"><h2>Classes needing a substitute</h2><span class="muted">Choose a teacher manually</span></div>${uncoveredRows.length?`<div class="table-wrap"><table><thead><tr><th>Class</th><th>Subject</th><th>Period</th><th>Absent teacher</th><th>Available eligible teachers</th><th>Action</th></tr></thead><tbody>${uncoveredRows.map(e=>{const original=teachers.find(t=>t.id===e.teacherId);const candidates=availableTeachers(state.day,e.period,e.grade,e.subject);return `<tr><td>Class ${e.grade}</td><td>${e.subject}</td><td>${e.period}<div class="person-sub">${timeFor(e.period)}</div></td><td>${original.name}</td><td>${candidates.length} available</td><td>${candidates.length?`<button class="small-btn assign" data-assign="${e.day}|${e.period}|${e.grade}">Choose teacher</button>`:status('No teacher available','unassigned')}</td></tr>`}).join('')}</tbody></table></div>`:`<div class="empty">No uncovered classes for ${state.day}. Mark a teacher absent to test this workflow.</div>`}</div>`+
+      '';
+  }
+  function notificationsPage() {
+    const pending=state.notifications.filter(n=>n.status==='Pending').slice().reverse();
+    const rows=state.notifications.filter(n=>n.status==='Sent').slice().reverse();
+    return pageHead('Notifications','A record of assignment messages generated by the demo.',`<button class="btn" data-action="clear-notifications">Clear history</button>`)+
+      `<div class="notice">Messages stay pending until the coordinator reviews and clicks Send. Sending is simulated in this demo; no real WhatsApp message is delivered.</div><div class="card" style="margin-bottom:18px"><div class="section-title"><h2>Pending messages</h2><span class="muted">${pending.length} awaiting review</span></div>${pending.length?pending.map(n=>`<div class="notification-row"><div><div style="font-weight:750">To ${n.teacher} · Demo School</div><div class="coverage-sub">Class ${n.grade} · Period ${n.period} · ${n.day}</div><div class="message-preview" style="margin-top:9px">${n.message}</div></div><div class="notification-actions"><button class="btn" data-edit-notification="${n.id}">Edit message</button><button class="btn primary" data-send-notification="${n.id}">Send</button><button class="undo-btn" data-undo-notification="${n.id}">Undo</button></div></div>`).join(''):`<div class="empty">No pending messages. Assign a substitute from Attendance to prepare one.</div>`}</div><div class="card"><div class="section-title"><h2>Sent notifications</h2><span class="muted">${rows.length} sent</span></div>${rows.length?rows.map(n=>`<div class="notification-row"><div><div style="font-weight:750">To ${n.teacher} · Demo School</div><div class="coverage-sub">Class ${n.grade} · Period ${n.period} · ${n.day} · Sent ${n.when}</div><div class="message-preview" style="margin-top:9px">${n.message}</div></div><button class="undo-btn" data-undo-notification="${n.id}">Undo</button></div>`).join(''):`<div class="empty">No notifications sent yet.</div>`}</div>`;
+  }
+  function bindPageEvents() {
+    document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+    document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>action(b.dataset.action)));
+    document.querySelectorAll('[data-day]').forEach(b=>b.addEventListener('click',()=>{state.day=b.dataset.day;render()}));
+    document.querySelectorAll('[data-assign]').forEach(b=>b.addEventListener('click',()=>assignmentModal(b.dataset.assign)));
+    document.querySelectorAll('[data-undo-notification]').forEach(b=>b.addEventListener('click',()=>undoNotification(Number(b.dataset.undoNotification))));
+    document.querySelectorAll('[data-undo-assignment]').forEach(b=>b.addEventListener('click',()=>undoNotification(Number(b.dataset.undoAssignment))));
+    document.querySelectorAll('[data-send-notification]').forEach(b=>b.addEventListener('click',()=>sendNotification(Number(b.dataset.sendNotification))));
+    document.querySelectorAll('[data-edit-notification]').forEach(b=>b.addEventListener('click',()=>editNotification(Number(b.dataset.editNotification))));
+    document.querySelectorAll('[data-edit-teacher]').forEach(b=>b.addEventListener('click',()=>teacherModal(b.dataset.editTeacher)));
+    document.querySelectorAll('[data-edit-entry]').forEach(b=>b.addEventListener('click',()=>entryModal(b.dataset.editEntry)));
+    const setVal=(id,fn,event='change')=>{const el=document.getElementById(id);if(el)el.addEventListener(event,()=>fn(el.value));};
+    setVal('dash-day',v=>{state.day=v;render()});
+    setVal('teacher-filter',v=>{state.teacherFilter=v;render()}); setVal('teacher-search',v=>{state.search=v;const pos=document.getElementById('teacher-search').selectionStart;render();const el=document.getElementById('teacher-search');el.focus();el.setSelectionRange(pos,pos)},'input');
+    setVal('grade-filter',v=>{state.selectedGrade=v;render()}); setVal('timetable-day',v=>{state.day=v;render()});
+    setVal('attendance-day',v=>{state.day=v;render()});
+    setVal('attendance-search',v=>{state.search=v;render()},'input');
+    setVal('availability-day',v=>{state.day=v;render()}); setVal('availability-period',v=>{state.period=Number(v);render()}); setVal('availability-grade',v=>{state.availabilityGrade=v;render()});
+    setVal('sub-day',v=>{state.day=v;render()});
+    document.querySelectorAll('[data-attendance]').forEach(el=>el.addEventListener('change',()=>{state.attendance[`${state.day}|${el.dataset.attendance}`]=el.value;render();toast('Attendance updated.')}));
+  }
+  function go(page) { state.page=page;state.search='';render(); }
+  function action(name) {
+    if(name==='reset-demo'){if(confirm('Reset all demo changes and restore the sample data?')){state.attendance={};state.assignments=[];state.notifications=[];state.day='Wednesday';state.period=3;render();toast('Demo data reset.')}}
+    if(name==='reset-attendance'){if(confirm('Reset attendance for '+state.day+'?')){teachers.forEach(t=>delete state.attendance[`${state.day}|${t.id}`]);render();toast('Attendance reset.')}}
+    if(name==='clear-notifications'){state.notifications=[];render();toast('Notification history cleared.');}
+    if(name==='add-teacher')teacherModal(null);
+    if(name==='duplicate-week'){state.timetableVersion='Week 2 · Draft copy';toast('A draft copy of the current timetable is ready. Edit entries as needed.');render();}
+    if(name==='print')window.print();
+    if(name==='export-teachers')downloadCSV('teachers-demo.csv',['ID','Name','Level','Subjects','Eligible classes'],teachers.map(t=>[t.id,t.name,t.band,t.subjects.join('; '),t.levels.join('; ')]));
+    if(name==='export-timetable')downloadCSV('timetable-'+state.day.toLowerCase()+'-class-'+state.selectedGrade+'.csv',['Day','Period','Time','Class','Subject','Teacher'],Object.values(timetable).filter(e=>e.day===state.day&&e.grade===Number(state.selectedGrade)).map(e=>[e.day,e.period,timeFor(e.period),e.grade,e.subject,teachers.find(t=>t.id===e.teacherId).name]));
+    if(name==='export-availability')downloadCSV('available-teachers.csv',['Teacher','Level','Subjects','Eligible classes'],allAvailable(state.day,state.period).map(t=>[t.name,t.band,t.subjects.join('; '),t.levels.join('; ')]));
+  }
+  function downloadCSV(filename,headers,rows){const csv=[headers,...rows].map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=filename;a.click();URL.revokeObjectURL(a.href);toast('CSV exported.');}
+  function openModal(title,body,onSave,saveLabel='Save') {
+    const root=document.getElementById('modal-root');
+    root.innerHTML=`<div class="modal-backdrop"><div class="modal"><div class="modal-head"><h2>${title}</h2><button class="close" id="modal-close">×</button></div>${body}<div class="modal-actions"><button class="btn" id="modal-cancel">Cancel</button><button class="btn primary" id="modal-save">${saveLabel}</button></div></div></div>`;
+    const close=()=>root.innerHTML='';root.querySelector('#modal-close').onclick=close;root.querySelector('#modal-cancel').onclick=close;root.querySelector('.modal-backdrop').addEventListener('click',e=>{if(e.target.classList.contains('modal-backdrop'))close()});
+    root.querySelector('#modal-save').onclick=()=>{if(onSave()!==false)close()};
+  }
+  function assignmentModal(key) {
+    const [day,p,grade]=key.split('|');const e=getEntry(day,Number(p),Number(grade));const original=teachers.find(t=>t.id===e.teacherId);const candidates=availableTeachers(day,Number(p),Number(grade),e.subject);
+    if(!candidates.length){toast('No eligible teacher is available for this class and period.');return;}
+    const first=candidates[0];
+    const defaultMessage=t=>`Assalam o Alaikum ${t.name}, you have been assigned Class ${grade}, period ${p} (${timeFor(Number(p)).split(' – ')[0]}), ${e.subject}, covering for ${original.name} today.`;
+    const body=`<div class="notice">${day} · Class ${grade} · Period ${p} (${timeFor(Number(p))}) · ${e.subject}<br>Covering for ${original.name}</div><div class="form-group"><label>SELECT SUBSTITUTE</label><select id="replacement-teacher">${candidates.map(t=>`<option value="${t.id}">${t.name} · ${t.band}</option>`).join('')}</select></div><div class="form-group" style="margin-top:14px"><label>WHATSAPP MESSAGE PREVIEW · EDIT BEFORE SENDING</label><textarea id="notification-message" rows="5" style="width:100%;resize:vertical;border:1px solid #DDE6E0;background:light-dark(#FFFFFF,#24332C);color:light-dark(#25372D,#E4EEE8);border-radius:9px;padding:12px;font:14px/1.55 inherit">${defaultMessage(first)}</textarea></div><div class="muted" id="notification-recipient" style="margin-top:9px">To ${first.name} · Demo School</div>`;
+    openModal('Assign substitute',body,()=>{const id=document.getElementById('replacement-teacher').value;const t=teachers.find(x=>x.id===id);const message=document.getElementById('notification-message').value.trim();if(!t||!isAvailable(t,day,Number(p))||!eligible(t,Number(grade),e.subject)){toast('This teacher is no longer available.');return false;}if(!message){toast('Please enter a notification message.');return false;}if(assignedTeacher(day,Number(p),Number(grade))){toast('This class already has a replacement.');return false;}const notificationId=state.nextNotificationId++;state.assignments.push({day,period:Number(p),grade:Number(grade),subject:e.subject,originalTeacherId:original.id,teacherId:id,status:'Approved',notificationId});state.notifications.push({id:notificationId,teacher:t.name,teacherId:id,day,period:Number(p),grade:Number(grade),subject:e.subject,message,status:'Pending',when:null});state.page='attendance';render();toast('Substitute assigned. Message added to Pending notifications.');},'Assign & queue message');
+    const select=document.getElementById('replacement-teacher');
+    select.addEventListener('change',()=>{const t=teachers.find(x=>x.id===select.value);const msg=document.getElementById('notification-message');const recipient=document.getElementById('notification-recipient');if(msg.dataset.edited!=='true')msg.value=defaultMessage(t);recipient.textContent=`To ${t.name} · Demo School`;});
+    document.getElementById('notification-message').addEventListener('input',e=>e.target.dataset.edited='true');
+  }
+  function undoNotification(id) {
+    const notification=state.notifications.find(n=>n.id===id);
+    if(!notification)return;
+    state.notifications=state.notifications.filter(n=>n.id!==id);
+    state.assignments=state.assignments.filter(a=>a.notificationId!==id);
+    render();
+    toast('Notification removed. Substitute is available again if still free.');
+  }
+  
+async function sendNotification(id) {
+  const n = state.notifications.find(
+    x => x.id === id && x.status === "Pending"
+  );
+
+  if (!n) return;
+
+  const button = document.querySelector(
+    `[data-send-notification="${id}"]`
+  );
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Sending...";
+  }
+
+  try {
+    const response = await fetch("/api/send-whatsapp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: n.message,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Message could not be sent.");
+    }
+
+    n.status = "Sent";
+    n.when = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    n.messageId = result.messageId;
+
+    render();
+    toast("WhatsApp message accepted by Meta.");
+  } catch (error) {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Send";
+    }
+
+    toast(error.message || "WhatsApp sending failed.");
+  }
+}
+
+  function editNotification(id) {
+    const n=state.notifications.find(x=>x.id===id&&x.status==='Pending');if(!n)return;
+    const body=`<div class="notice">To ${n.teacher} · Demo School · Class ${n.grade} · Period ${n.period}</div><div class="form-group"><label>WHATSAPP MESSAGE</label><textarea id="edit-pending-message" rows="5" style="width:100%;resize:vertical;border:1px solid #DDE6E0;border-radius:9px;padding:12px;font:14px/1.55 inherit">${n.message}</textarea></div>`;
+    openModal('Edit pending message',body,()=>{const message=document.getElementById('edit-pending-message').value.trim();if(!message){toast('Please enter a message.');return false;}n.message=message;render();toast('Pending message updated.');});
+  }
+  function teacherModal(id) {
+    const t=id?teachers.find(x=>x.id===id):null;
+    const body=`<div class="form-grid"><div class="form-group"><label>FULL NAME</label><input id="t-name" value="${t?.name||''}" placeholder="Teacher name"></div><div class="form-group"><label>TEACHER ID</label><input id="t-id" value="${t?.id||'T-NEW'}" ${t?'disabled':''}></div><div class="form-group"><label>TEACHING LEVEL</label><select id="t-band"><option ${t?.band==='Primary'?'selected':''}>Primary</option><option ${t?.band==='Middle'?'selected':''}>Middle</option><option ${t?.band==='Secondary'?'selected':''}>Secondary</option></select></div><div class="form-group"><label>DAILY PERIOD LIMIT</label><input id="t-max" type="number" min="1" max="8" value="${t?.max||6}"></div><div class="form-group full"><label>SUBJECTS (comma separated)</label><input id="t-subjects" value="${t?.subjects.join(', ')||'Mathematics, English'}"></div><div class="form-group full"><label>ELIGIBLE CLASS LEVELS (comma separated)</label><input id="t-levels" value="${t?.levels.join(', ')||'1, 2, 3, 4, 5'}"></div></div>`;
+    openModal(t?'Edit teacher':'Add teacher',body,()=>{const name=document.getElementById('t-name').value.trim();const band=document.getElementById('t-band').value;const subs=document.getElementById('t-subjects').value.split(',').map(s=>s.trim()).filter(Boolean);const levels=document.getElementById('t-levels').value.split(',').map(Number).filter(n=>n>=1&&n<=10);if(!name||!subs.length||!levels.length){toast('Please complete the required fields.');return false;}if(t){t.name=name;t.band=band;t.subjects=subs;t.levels=levels;t.max=Number(document.getElementById('t-max').value)||6;}else{const newId=document.getElementById('t-id').value.trim();if(teachers.some(x=>x.id===newId)){toast('Teacher ID already exists.');return false;}teachers.push({id:newId,name,band,subjects:subs,levels,max:Number(document.getElementById('t-max').value)||6,phone:'Not provided',active:true});}render();toast('Teacher profile saved.');});
+  }
+  function entryModal(key) {
+    const [day,p,g]=key.split('|');const e=getEntry(day,Number(p),Number(g));const qualified=teachers.filter(t=>t.levels.includes(Number(g)));
+    const body=`<div class="notice">${day} · Period ${p} · Class ${g} · ${timeFor(Number(p))}</div><div class="form-grid"><div class="form-group"><label>SUBJECT</label><select id="entry-subject">${classSubjects(Number(g)).map(s=>`<option ${e.subject===s?'selected':''}>${s}</option>`).join('')}</select></div><div class="form-group"><label>TEACHER</label><select id="entry-teacher">${qualified.map(t=>`<option value="${t.id}" ${e.teacherId===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div></div>`;
+    openModal('Edit timetable entry',body,()=>{const subject=document.getElementById('entry-subject').value;const teacherId=document.getElementById('entry-teacher').value;const t=teachers.find(x=>x.id===teacherId);if(!eligible(t,Number(g),subject)){toast('Selected teacher is not qualified for this subject and class.');return false;}const conflict=Object.values(timetable).some(x=>x.day===day&&x.period===Number(p)&&x.grade!==Number(g)&&x.teacherId===teacherId);if(conflict){toast('Timetable conflict: this teacher already has a class in this period.');return false;}e.subject=subject;e.teacherId=teacherId;render();toast('Timetable entry updated.');});
+  }
+  document.getElementById('navigation').addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b)go(b.dataset.page)});
+  render();
+})();
+</script>
+</body>
+</html>
