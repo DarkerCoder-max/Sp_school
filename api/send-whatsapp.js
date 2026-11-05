@@ -1,10 +1,11 @@
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({
-      success: false,
-      error: "Method not allowed",
-    });
+    return res.status(405).json({ success: false, error: "Method not allowed" });
+  }
+
+  // Optional but strongly recommended
+  if (req.headers["x-api-key"] !== process.env.API_SECRET) {
+    return res.status(401).json({ success: false, error: "Unauthorized" });
   }
 
   const token = process.env.WHATSAPP_ACCESS_TOKEN;
@@ -19,24 +20,30 @@ export default async function handler(req, res) {
     });
   }
 
-  const message = req.body?.message;
-
-  if (
-    typeof message !== "string" ||
-    !message.trim() ||
-    message.length > 4096
-  ) {
-    return res.status(400).json({
-      success: false,
-      error: "Message must contain 1–4096 characters.",
-    });
-  }
-
-  // Only allow a configured international number.
   if (!/^\d{8,15}$/.test(recipient)) {
     return res.status(500).json({
       success: false,
       error: "WHATSAPP_RECIPIENT must contain digits only.",
+    });
+  }
+
+  const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+  const p = body?.params ?? {};
+
+  // If you keep the template, map real values — don't hardcode.
+  const params = [
+    p.teacherName,
+    p.period,
+    p.classNumber,
+    p.timeSlot,
+    p.subject,
+    p.substituteTeacher,
+  ];
+
+  if (params.some((v) => typeof v !== "string" || !v.trim())) {
+    return res.status(400).json({
+      success: false,
+      error: "All 6 template parameters are required.",
     });
   }
 
@@ -53,10 +60,16 @@ export default async function handler(req, res) {
           messaging_product: "whatsapp",
           recipient_type: "individual",
           to: recipient,
-          type: "text",
-          text: {
-            preview_url: false,
-            body: message.trim(),
+          type: "template",
+          template: {
+            name: "teacher_substitutional_notification", // exact approved name
+            language: { code: "en" },                    // exact approved code
+            components: [
+              {
+                type: "body",
+                parameters: params.map((text) => ({ type: "text", text })),
+              },
+            ],
           },
         }),
       }
@@ -66,12 +79,10 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       console.error("WhatsApp API error:", data);
-
       return res.status(response.status).json({
         success: false,
-        error:
-          data?.error?.message ||
-          "Meta rejected the WhatsApp message.",
+        error: data?.error?.message || "Meta rejected the WhatsApp message.",
+        code: data?.error?.code ?? null,
       });
     }
 
@@ -82,11 +93,9 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error("WhatsApp request failed:", error);
-
     return res.status(500).json({
       success: false,
       error: "Could not connect to WhatsApp API.",
     });
   }
 }
-
