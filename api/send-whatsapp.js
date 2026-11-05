@@ -66,9 +66,9 @@ export default async function handler(req, res) {
               {
                 type: "body",
                 parameters: [
-                  { type: "text", text: teacher },      // {{1}}
-                  { type: "text", text: className },    // {{2}}
-                  { type: "text", text: period },       // {{3}}
+                  { type: "text", text: `*${teacher}*` },      // {{1}} Bold Teacher Name
+                  { type: "text", text: `*${className}*` },    // {{2}} Bold Class
+                  { type: "text", text: `*${period}*` },       // {{3}} Bold Period
                   { type: "text", text: time },         // {{4}}
                   { type: "text", text: subject },      // {{5}}
                   { type: "text", text: substitute }    // {{6}}
